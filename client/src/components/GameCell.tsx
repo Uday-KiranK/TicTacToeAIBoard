@@ -6,9 +6,12 @@ interface GameCellProps {
   onClick: () => void;
   disabled?: boolean;
   isWinningCell?: boolean;
+  currentPlayer?: "X" | "O";
 }
 
-export default function GameCell({ value, onClick, disabled, isWinningCell }: GameCellProps) {
+export default function GameCell({ value, onClick, disabled, isWinningCell, currentPlayer }: GameCellProps) {
+  const isActivePlayerSymbol = value && value === currentPlayer;
+  
   return (
     <Button
       variant="outline"
@@ -20,8 +23,18 @@ export default function GameCell({ value, onClick, disabled, isWinningCell }: Ga
         isWinningCell ? "bg-primary/20 border-primary" : ""
       }`}
     >
-      {value === "X" && <X className="w-12 h-12 text-primary" strokeWidth={3} />}
-      {value === "O" && <Circle className="w-12 h-12 text-chart-2" strokeWidth={3} />}
+      {value === "X" && (
+        <X 
+          className={`w-12 h-12 ${isActivePlayerSymbol ? "text-primary opacity-100" : "text-primary/40"}`} 
+          strokeWidth={isActivePlayerSymbol ? 4 : 3} 
+        />
+      )}
+      {value === "O" && (
+        <Circle 
+          className={`w-12 h-12 ${isActivePlayerSymbol ? "text-chart-2 opacity-100" : "text-chart-2/40"}`} 
+          strokeWidth={isActivePlayerSymbol ? 4 : 3} 
+        />
+      )}
     </Button>
   );
 }

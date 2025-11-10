@@ -79,8 +79,8 @@ export default function AIHelperPanel({
         ) : (
           <div className="p-6 text-center space-y-2">
             <p className="text-sm text-muted-foreground">
-              {emptyCount > 7
-                ? "Analysis starts after 2 moves (to optimize performance)"
+              {emptyCount > 5
+                ? "Analysis starts after 4 moves (to optimize performance)"
                 : emptyCount === 0
                 ? "Game complete"
                 : "Make a move to see analysis"}
@@ -104,8 +104,8 @@ export default function AIHelperPanel({
         ) : (
           <div className="p-8 text-center">
             <p className="text-sm text-muted-foreground">
-              {emptyCount > 7
-                ? "Tree visualization will appear after 2 moves"
+              {emptyCount > 5
+                ? "Tree visualization will appear after 4 moves"
                 : "No tree data available"}
             </p>
           </div>

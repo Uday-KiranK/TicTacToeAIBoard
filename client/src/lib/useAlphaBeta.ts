@@ -22,7 +22,7 @@ export function useAlphaBeta(board: BoardState, currentPlayer: "X" | "O", enable
 
     const emptyCount = board.filter(cell => cell === null).length;
     
-    if (emptyCount === 0 || emptyCount > 7) {
+    if (emptyCount === 0 || emptyCount > 5) {
       return {
         bestMove: null,
         bestScore: null,
@@ -35,11 +35,20 @@ export function useAlphaBeta(board: BoardState, currentPlayer: "X" | "O", enable
       const { bestMove, bestScore, tree } = alphaBetaPruning(board, currentPlayer);
       const treeData = flattenTree(tree);
       
+      let winningPathId: string | null = null;
+      if (bestMove !== null && bestScore !== null && treeData.length > 1) {
+        const bestChild = treeData[1].find(node => node.move === bestMove);
+        if (bestChild?.pathId) {
+          winningPathId = bestChild.pathId;
+        }
+      }
+      
       const markedTreeData = treeData.map((level, levelIdx) =>
         level.map((node) => ({
           ...node,
           isCurrentNode: levelIdx === 0,
           bestMove: node.move === bestMove && levelIdx === 1,
+          isOnWinningPath: winningPathId ? (node.pathId?.startsWith(winningPathId) || node.pathId === "0") : false,
         }))
       );
 

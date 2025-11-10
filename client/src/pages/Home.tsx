@@ -1,12 +1,20 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit } from "lucide-react";
+import { BrainCircuit, Trophy, Users } from "lucide-react";
 import GameBoard from "@/components/GameBoard";
 import GameHeader from "@/components/GameHeader";
 import AIHelperPanel from "@/components/AIHelperPanel";
 import RoomLobby from "@/components/RoomLobby";
 import { useWebSocket } from "@/lib/useWebSocket";
 import { useAlphaBeta } from "@/lib/useAlphaBeta";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Home() {
   const [gameState, setGameState] = useState<"lobby" | "playing">("lobby");
@@ -45,6 +53,15 @@ export default function Home() {
     makeMove(gameRoom.id, index);
   };
 
+  const handleNewGame = () => {
+    createRoom();
+    setGameState("lobby");
+  };
+
+  const handleBackToLobby = () => {
+    setGameState("lobby");
+  };
+
   const board = gameRoom?.board || Array(9).fill(null);
   const currentPlayer = gameRoom?.currentPlayer || "X";
   
@@ -57,6 +74,9 @@ export default function Home() {
   if (gameState === "lobby" || !gameRoom) {
     return <RoomLobby onCreateRoom={handleCreateRoom} onJoinRoom={handleJoinRoom} />;
   }
+
+  const isGameFinished = gameRoom.status === "finished";
+  const gameWinner = gameRoom.winner;
 
   return (
     <div className="h-screen flex flex-col">
@@ -74,6 +94,7 @@ export default function Home() {
             board={board}
             onCellClick={handleCellClick}
             disabled={gameRoom.status !== "playing" || currentPlayer !== playerSymbol}
+            currentPlayer={gameRoom.status === "playing" ? currentPlayer : undefined}
           />
 
           <Button
@@ -99,6 +120,42 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={isGameFinished}>
+        <AlertDialogContent data-testid="game-over-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-2xl">
+              <Trophy className="w-6 h-6 text-chart-2" />
+              Game Over!
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-lg pt-4">
+              {gameWinner === "draw" ? (
+                <span className="font-semibold">It's a draw!</span>
+              ) : gameWinner === playerSymbol ? (
+                <span className="font-semibold text-chart-2">Congratulations! You won!</span>
+              ) : (
+                <span className="font-semibold">Your opponent won this time.</span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={handleBackToLobby}
+              data-testid="button-back-lobby"
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Back to Lobby
+            </Button>
+            <Button
+              onClick={handleNewGame}
+              data-testid="button-new-game"
+            >
+              New Game
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

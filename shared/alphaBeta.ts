@@ -10,6 +10,8 @@ export interface TreeNodeData {
   depth: number;
   move?: number;
   children?: TreeNodeData[];
+  pathId?: string;
+  isOnWinningPath?: boolean;
 }
 
 export interface AlphaBetaResult {
@@ -258,20 +260,25 @@ export function alphaBetaPruning(board: BoardState, player: "X" | "O"): AlphaBet
 
 export function flattenTree(node: TreeNodeData): TreeNodeData[][] {
   const levels: TreeNodeData[][] = [];
+  let nodeCounter = 0;
   
-  function traverse(currentNode: TreeNodeData, depth: number) {
+  function traverse(currentNode: TreeNodeData, depth: number, parentPath: string = "") {
     if (!levels[depth]) {
       levels[depth] = [];
     }
     
+    const nodeIndex = levels[depth].length;
+    const pathId = parentPath ? `${parentPath}.${nodeIndex}` : `${nodeIndex}`;
+    
     levels[depth].push({
       ...currentNode,
       children: undefined,
+      pathId,
     });
     
     if (currentNode.children) {
       for (const child of currentNode.children) {
-        traverse(child, depth + 1);
+        traverse(child, depth + 1, pathId);
       }
     }
   }

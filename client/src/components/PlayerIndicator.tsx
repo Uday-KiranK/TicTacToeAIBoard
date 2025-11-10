@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { X, Circle } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface PlayerIndicatorProps {
   symbol: "X" | "O";
@@ -9,20 +10,22 @@ interface PlayerIndicatorProps {
 
 export default function PlayerIndicator({ symbol, isActive, label }: PlayerIndicatorProps) {
   return (
-    <div className="flex items-center gap-2">
-      <Badge
-        variant={isActive ? "default" : "outline"}
-        className="flex items-center gap-1.5 px-3 py-1.5"
-        data-testid={`player-${symbol}`}
-      >
+    <Card className={`px-4 py-2 flex items-center gap-3 ${isActive ? "border-2 border-primary" : ""}`}>
+      <div className="flex items-center gap-2">
         {symbol === "X" ? (
-          <X className="w-4 h-4" strokeWidth={2.5} />
+          <X className={`w-5 h-5 ${isActive ? "text-primary" : "text-muted-foreground"}`} strokeWidth={3} />
         ) : (
-          <Circle className="w-4 h-4" strokeWidth={2.5} />
+          <Circle className={`w-5 h-5 ${isActive ? "text-chart-2" : "text-muted-foreground"}`} strokeWidth={3} />
         )}
-        <span className="font-semibold">{symbol}</span>
-      </Badge>
-      {label && <span className="text-sm text-muted-foreground">{label}</span>}
-    </div>
+        <span className={`font-bold text-lg ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
+          {symbol}
+        </span>
+      </div>
+      {label && (
+        <Badge variant={isActive ? "default" : "outline"} className="text-xs">
+          {label}
+        </Badge>
+      )}
+    </Card>
   );
 }

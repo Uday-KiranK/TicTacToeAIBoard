@@ -59,16 +59,16 @@ export default function GameHeader({
             </div>
           )}
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <PlayerIndicator
               symbol="X"
               isActive={gameStatus === "playing" && currentPlayer === "X"}
-              label={playerSymbol === "X" ? "(You)" : ""}
+              label={playerSymbol === "X" ? "You" : ""}
             />
             <PlayerIndicator
               symbol="O"
               isActive={gameStatus === "playing" && currentPlayer === "O"}
-              label={playerSymbol === "O" ? "(You)" : ""}
+              label={playerSymbol === "O" ? "You" : ""}
             />
           </div>
         </div>

@@ -11,6 +11,8 @@ export interface TreeNodeData {
   isPruned: boolean;
   isCurrentNode?: boolean;
   bestMove?: boolean;
+  pathId?: string;
+  isOnWinningPath?: boolean;
 }
 
 interface TreeNodeProps {
@@ -35,16 +37,25 @@ export default function TreeNode({ data, onClick }: TreeNodeProps) {
           ? "border-4 border-primary"
           : data.bestMove
           ? "border-2 border-chart-2"
+          : data.isOnWinningPath
+          ? "border-2 border-chart-2/50 bg-chart-2/5"
           : "border-2"
       }`}
       onClick={onClick}
       data-testid="tree-node"
     >
       <div className="space-y-2">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <Badge variant={data.nodeType === "MAX" ? "default" : "secondary"} className="text-xs">
             {data.nodeType}
           </Badge>
+          {data.pathId && (
+            <Badge variant="outline" className="text-xs font-mono">
+              {data.pathId}
+            </Badge>
+          )}
+        </div>
+        <div className="flex items-center gap-1 flex-wrap">
           {data.isPruned && (
             <Badge variant="outline" className="text-xs">
               Pruned
@@ -53,6 +64,11 @@ export default function TreeNode({ data, onClick }: TreeNodeProps) {
           {data.bestMove && (
             <Badge className="text-xs bg-chart-2 text-white">
               Best
+            </Badge>
+          )}
+          {data.isOnWinningPath && !data.bestMove && (
+            <Badge variant="outline" className="text-xs bg-chart-2/10 border-chart-2/30">
+              Path
             </Badge>
           )}
         </div>
