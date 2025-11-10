@@ -10,7 +10,7 @@ import { useAlphaBeta } from "@/lib/useAlphaBeta";
 
 export default function Home() {
   const [gameState, setGameState] = useState<"lobby" | "playing">("lobby");
-  const [showAIHelper, setShowAIHelper] = useState(false);
+  const [showAIHelper, setShowAIHelper] = useState(true);
   const { connected, gameRoom, playerSymbol, createRoom, joinRoom, makeMove } = useWebSocket();
 
   useEffect(() => {
@@ -50,7 +50,8 @@ export default function Home() {
   
   const { bestMove, bestScore, treeData } = useAlphaBeta(
     board,
-    playerSymbol || currentPlayer
+    playerSymbol || currentPlayer,
+    showAIHelper && gameRoom !== null
   );
 
   if (gameState === "lobby" || !gameRoom) {

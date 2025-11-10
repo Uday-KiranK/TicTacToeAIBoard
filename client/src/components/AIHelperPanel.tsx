@@ -18,8 +18,12 @@ export default function AIHelperPanel({
   bestMove,
   bestScore,
   treeData,
+  currentBoard,
 }: AIHelperPanelProps) {
   if (!isVisible) return null;
+
+  const emptyCount = currentBoard.filter(cell => cell === null).length;
+  const isAnalysisAvailable = bestMove !== null && treeData.length > 0;
 
   const scoreColor =
     bestScore === 1
@@ -36,7 +40,7 @@ export default function AIHelperPanel({
           <h2 className="text-lg font-semibold">Alpha-Beta Pruning Analysis</h2>
         </div>
 
-        {bestMove !== null && (
+        {isAnalysisAvailable ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-chart-2" />
@@ -72,6 +76,16 @@ export default function AIHelperPanel({
               </Badge>
             </div>
           </div>
+        ) : (
+          <div className="p-6 text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              {emptyCount > 7
+                ? "Analysis starts after 2 moves (to optimize performance)"
+                : emptyCount === 0
+                ? "Game complete"
+                : "Make a move to see analysis"}
+            </p>
+          </div>
         )}
       </Card>
 
@@ -82,10 +96,20 @@ export default function AIHelperPanel({
             All possible moves with alpha-beta values
           </p>
         </div>
-        <GameTree
-          treeData={treeData}
-          onNodeClick={(node) => console.log("Tree node clicked:", node)}
-        />
+        {treeData.length > 0 ? (
+          <GameTree
+            treeData={treeData}
+            onNodeClick={(node) => console.log("Tree node clicked:", node)}
+          />
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              {emptyCount > 7
+                ? "Tree visualization will appear after 2 moves"
+                : "No tree data available"}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
