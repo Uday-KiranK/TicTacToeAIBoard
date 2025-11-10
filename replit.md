@@ -30,6 +30,8 @@ Preferred communication style: Simple, everyday language.
 - Educational-first approach prioritizing clarity over complexity in the AI visualization
 - Real-time multiplayer using WebSockets for instant game updates
 - Alpha-beta pruning computation happens client-side to visualize the entire decision tree
+- Performance optimization: AI analysis only runs when 1-7 cells are empty (skips initial board and early game to prevent lag)
+- Graceful degradation: Shows contextual messages ("Analysis starts after 2 moves") when AI analysis is unavailable
 - Responsive design with mobile-first considerations (collapsible panels, adaptive layouts)
 
 ### Backend Architecture
