@@ -1,135 +1,70 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Brain, BrainCircuit } from "lucide-react";
+import { BrainCircuit } from "lucide-react";
 import GameBoard from "@/components/GameBoard";
 import GameHeader from "@/components/GameHeader";
 import AIHelperPanel from "@/components/AIHelperPanel";
 import RoomLobby from "@/components/RoomLobby";
-import { TreeNodeData } from "@/components/TreeNode";
-
-function generateMockTreeData(board: (string | null)[]): TreeNodeData[][] {
-  const emptyIndices = board
-    .map((cell, idx) => (cell === null ? idx : -1))
-    .filter((idx) => idx !== -1);
-
-  if (emptyIndices.length === 0) return [];
-
-  const rootNode: TreeNodeData = {
-    board: [...board],
-    alpha: -Infinity,
-    beta: Infinity,
-    score: null,
-    nodeType: "MAX",
-    isPruned: false,
-    isCurrentNode: true,
-  };
-
-  const childNodes: TreeNodeData[] = emptyIndices.slice(0, 4).map((idx, i) => {
-    const newBoard = [...board];
-    newBoard[idx] = "X";
-    return {
-      board: newBoard,
-      alpha: -Infinity,
-      beta: i < 2 ? Infinity : 0,
-      score: i === 0 ? 0 : i === 1 ? -1 : null,
-      nodeType: "MIN" as const,
-      isPruned: i >= 2,
-      bestMove: i === 0,
-    };
-  });
-
-  return [
-    [rootNode],
-    childNodes,
-  ];
-}
+import { useWebSocket } from "@/lib/useWebSocket";
+import { useAlphaBeta } from "@/lib/useAlphaBeta";
 
 export default function Home() {
   const [gameState, setGameState] = useState<"lobby" | "playing">("lobby");
-  const [roomId, setRoomId] = useState<string>("");
-  const [board, setBoard] = useState<(string | null)[]>(Array(9).fill(null));
-  const [currentPlayer, setCurrentPlayer] = useState<"X" | "O">("X");
-  const [playerSymbol] = useState<"X" | "O">("X");
   const [showAIHelper, setShowAIHelper] = useState(false);
-  const [winner, setWinner] = useState<"X" | "O" | "draw" | null>(null);
+  const { connected, gameRoom, playerSymbol, createRoom, joinRoom, makeMove } = useWebSocket();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const roomParam = params.get("room");
+    if (roomParam && connected) {
+      joinRoom(roomParam);
+      setGameState("playing");
+    }
+  }, [connected, joinRoom]);
+
+  useEffect(() => {
+    if (gameRoom) {
+      setGameState("playing");
+    }
+  }, [gameRoom]);
 
   const handleCreateRoom = () => {
-    const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-    setRoomId(newRoomId);
-    setGameState("playing");
-    setBoard(Array(9).fill(null));
-    setCurrentPlayer("X");
-    setWinner(null);
-    console.log("Created room:", newRoomId);
+    createRoom();
   };
 
   const handleJoinRoom = (id: string) => {
-    setRoomId(id);
-    setGameState("playing");
-    setBoard(Array(9).fill(null));
-    setCurrentPlayer("X");
-    setWinner(null);
-    console.log("Joined room:", id);
-  };
-
-  const checkWinner = (boardState: (string | null)[]): "X" | "O" | "draw" | null => {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-
-    for (const [a, b, c] of lines) {
-      if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
-        return boardState[a] as "X" | "O";
-      }
-    }
-
-    if (boardState.every((cell) => cell !== null)) {
-      return "draw";
-    }
-
-    return null;
+    joinRoom(id);
   };
 
   const handleCellClick = (index: number) => {
-    if (board[index] || winner || currentPlayer !== playerSymbol) return;
+    if (!gameRoom || !playerSymbol) return;
+    if (gameRoom.board[index] !== null) return;
+    if (gameRoom.status !== "playing") return;
+    if (gameRoom.currentPlayer !== playerSymbol) return;
 
-    const newBoard = [...board];
-    newBoard[index] = currentPlayer;
-    setBoard(newBoard);
-
-    const gameWinner = checkWinner(newBoard);
-    if (gameWinner) {
-      setWinner(gameWinner);
-    } else {
-      setCurrentPlayer(currentPlayer === "X" ? "O" : "X");
-    }
-
-    console.log("Cell clicked:", index);
+    makeMove(gameRoom.id, index);
   };
 
-  const treeData = generateMockTreeData(board);
-  const bestMove = board.findIndex((cell) => cell === null);
-  const bestScore = 0;
+  const board = gameRoom?.board || Array(9).fill(null);
+  const currentPlayer = gameRoom?.currentPlayer || "X";
+  
+  const { bestMove, bestScore, treeData } = useAlphaBeta(
+    board,
+    playerSymbol || currentPlayer
+  );
 
-  if (gameState === "lobby") {
+  if (gameState === "lobby" || !gameRoom) {
     return <RoomLobby onCreateRoom={handleCreateRoom} onJoinRoom={handleJoinRoom} />;
   }
 
   return (
     <div className="h-screen flex flex-col">
       <GameHeader
-        roomId={roomId}
+        roomId={gameRoom.id}
         currentPlayer={currentPlayer}
         playerSymbol={playerSymbol}
-        gameStatus={winner ? "finished" : "playing"}
-        winner={winner}
+        gameStatus={gameRoom.status}
+        winner={gameRoom.winner}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -137,7 +72,7 @@ export default function Home() {
           <GameBoard
             board={board}
             onCellClick={handleCellClick}
-            disabled={winner !== null || currentPlayer !== playerSymbol}
+            disabled={gameRoom.status !== "playing" || currentPlayer !== playerSymbol}
           />
 
           <Button
