@@ -19,7 +19,7 @@ import {
 export default function Home() {
   const [gameState, setGameState] = useState<"lobby" | "playing">("lobby");
   const [showAIHelper, setShowAIHelper] = useState(true);
-  const { connected, gameRoom, playerSymbol, createRoom, joinRoom, makeMove } = useWebSocket();
+  const { connected, gameRoom, playerSymbol, createRoom, joinRoom, makeMove, requestRematch } = useWebSocket();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -54,8 +54,12 @@ export default function Home() {
   };
 
   const handleNewGame = () => {
-    createRoom();
-    setGameState("lobby");
+    if (gameRoom) {
+      requestRematch(gameRoom.id);
+    } else {
+      createRoom();
+      setGameState("lobby");
+    }
   };
 
   const handleBackToLobby = () => {

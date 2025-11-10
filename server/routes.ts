@@ -85,6 +85,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
             break;
           }
+
+          case "rematch": {
+            const room = storage.rematchRoom(parsed.roomId, clientId);
+            if (room) {
+              broadcastToRoom(parsed.roomId, {
+                type: "rematch",
+                game: room,
+              });
+            } else {
+              ws.send(
+                JSON.stringify({
+                  type: "error",
+                  error: "Cannot rematch",
+                })
+              );
+            }
+            break;
+          }
         }
       } catch (error) {
         console.error("WebSocket error:", error);

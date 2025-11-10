@@ -27,12 +27,16 @@ export const wsMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("create"),
   }),
+  z.object({
+    type: z.literal("rematch"),
+    roomId: z.string(),
+  }),
 ]);
 
 export type WSMessage = z.infer<typeof wsMessageSchema>;
 
 export interface WSResponse {
-  type: "room_created" | "room_joined" | "game_state" | "error" | "player_joined" | "game_over";
+  type: "room_created" | "room_joined" | "game_state" | "error" | "player_joined" | "game_over" | "rematch";
   roomId?: string;
   playerSymbol?: "X" | "O";
   game?: GameRoom;

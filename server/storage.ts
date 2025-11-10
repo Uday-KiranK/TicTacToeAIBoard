@@ -6,6 +6,7 @@ export interface IStorage {
   getRoom(id: string): GameRoom | undefined;
   joinRoom(roomId: string, playerId: string): { room: GameRoom; symbol: "X" | "O" } | null;
   makeMove(roomId: string, playerId: string, cellIndex: number): GameRoom | null;
+  rematchRoom(roomId: string, playerId: string): GameRoom | null;
   getAllRooms(): GameRoom[];
 }
 
@@ -118,6 +119,23 @@ export class MemStorage implements IStorage {
     } else {
       room.currentPlayer = room.currentPlayer === "X" ? "O" : "X";
     }
+
+    return room;
+  }
+
+  rematchRoom(roomId: string, playerId: string): GameRoom | null {
+    const room = this.rooms.get(roomId);
+    if (!room) return null;
+
+    const playerSymbol = this.getPlayerSymbol(roomId, playerId);
+    if (!playerSymbol) return null;
+
+    if (room.status !== "finished") return null;
+
+    room.board = Array(9).fill(null);
+    room.currentPlayer = "X";
+    room.winner = null;
+    room.status = "playing";
 
     return room;
   }

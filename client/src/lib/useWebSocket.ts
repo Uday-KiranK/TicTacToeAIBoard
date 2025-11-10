@@ -29,6 +29,7 @@ export function useWebSocket() {
           case "player_joined":
           case "game_state":
           case "game_over":
+          case "rematch":
             if (response.game) {
               setGameRoom(response.game);
             }
@@ -105,6 +106,13 @@ export function useWebSocket() {
     [sendMessage]
   );
 
+  const requestRematch = useCallback(
+    (roomId: string) => {
+      sendMessage({ type: "rematch", roomId });
+    },
+    [sendMessage]
+  );
+
   return {
     connected,
     gameRoom,
@@ -112,5 +120,6 @@ export function useWebSocket() {
     createRoom,
     joinRoom,
     makeMove,
+    requestRematch,
   };
 }
