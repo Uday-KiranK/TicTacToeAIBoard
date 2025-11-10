@@ -109,11 +109,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     const playerIds = [room.players.X, room.players.O].filter(Boolean) as string[];
 
-    for (const [clientId, client] of clients.entries()) {
+    clients.forEach((client, clientId) => {
       if (playerIds.includes(clientId) && client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(message));
       }
-    }
+    });
   }
 
   return httpServer;
