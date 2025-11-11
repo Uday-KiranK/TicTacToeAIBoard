@@ -1,6 +1,22 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+package-lock.json   # optional – you can keep it if you want lockfiles
+
+# Build output
+dist/
+
+# Local environment
+.env
+.env.local
+secrets.toml
+
+# Replit leftovers
+.replit
+.replit-run
+replit.md
+generated-icon.png
+drizzle.config.ts
+
+# IDE / OS
+.vscode/
 .DS_Store
-server/public
-vite.config.ts.*
-*.tar.gz
