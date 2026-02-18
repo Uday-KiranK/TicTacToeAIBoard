@@ -4,6 +4,11 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
+app.get('/loaderio-2633932b5002e93083e1254ec7c2fb0e/', (_req, res) => {
+  res.type('text/plain');
+  res.send('loaderio-2633932b5002e93083e1254ec7c2fb0e');
+});
+
 declare module 'http' {
   interface IncomingMessage {
     rawBody: unknown
